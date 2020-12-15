@@ -1,11 +1,14 @@
 package com.ugo.android.notekeeper;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Menu;
+import android.widget.TextView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -20,6 +23,8 @@ import androidx.navigation.ui.NavigationUI;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,6 +47,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private NavigationView navigationView;
     private Menu menu;
     private final int SPAN_COUNT = 2;
+    private NoteKeeperOpenHelper mDbOpenHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        mDbOpenHelper = new NoteKeeperOpenHelper(this);
+
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +64,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 startActivity(new Intent(MainActivity.this, NoteActivity.class));
             }
         });
+
+        PreferenceManager.setDefaultValues(this, R.xml.general_preferences, Boolean.FALSE);
+        PreferenceManager.setDefaultValues(this, R.xml.messages_preferences, Boolean.FALSE);
+        PreferenceManager.setDefaultValues(this, R.xml.sync_preferences, Boolean.FALSE);
+
         drawer = findViewById(R.id.drawer_layout);
         navigationView = findViewById(R.id.nav_view);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
@@ -83,9 +96,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
         //adapterNotes.notifyDataSetChanged();
         mAdapter.notifyDataSetChanged();
+        updateNavHeader();
+    }
+
+    @Override
+    protected void onDestroy() {
+        mDbOpenHelper.close();
+        super.onDestroy();
+    }
+
+    private void updateNavHeader() {
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        View headerView = navigationView.getHeaderView(0);
+        TextView userNameText = headerView.findViewById(R.id.text_user_name);
+        TextView emailText = headerView.findViewById(R.id.text_email_address);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        String username = pref.getString("displayName", "");
+        String email = pref.getString("email", "");
+
+        userNameText.setText(username);
+        emailText.setText(email);
     }
 
     private void initializeDisplayContent() {
+        DataManager.loadFromDatabase(mDbOpenHelper);
         recyclerItems = findViewById(R.id.list_items);
         notesLayoutManager = new LinearLayoutManager(this);
         coursesLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
@@ -126,6 +161,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         return NavigationUI.navigateUp(navController, mAppBarConfiguration)
@@ -146,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 drawer.closeDrawer(Gravity.LEFT);
                 break;
             case R.id.nav_share:
-                handleSelection("Share");
+                handleShare();
                 drawer.closeDrawer(Gravity.LEFT);
                 break;
             case R.id.nav_send:
@@ -155,6 +201,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 break;
         }
         return false;
+    }
+
+    private void handleShare() {
+        View view = findViewById(R.id.list_items);
+        Snackbar.make(view, "Share to - " +
+                PreferenceManager.getDefaultSharedPreferences(this).getString("socialNetwork", ""),
+                Snackbar.LENGTH_LONG).show();
     }
 
     private void handleSelection(String message) {

@@ -1,0 +1,20 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <Preference
+        app:fragment="com.ugo.android.notekeeper.SettingsActivity$GeneralFragment"
+        app:icon="@drawable/ic_general_circle_24"
+        app:key="general_header"
+        app:title="@string/general_header" />
+
+    <Preference
+        app:fragment="com.ugo.android.notekeeper.SettingsActivity$MessagesFragment"
+        app:icon="@drawable/messages"
+        app:key="messages_header"
+        app:title="@string/messages_header" />
+
+    <Preference
+        app:fragment="com.ugo.android.notekeeper.SettingsActivity$SyncFragment"
+        app:icon="@drawable/sync"
+        app:key="sync_header"
+        app:title="@string/sync_header" />
+
+</PreferenceScreen>

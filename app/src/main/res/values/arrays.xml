@@ -1,0 +1,27 @@
+<resources>
+    <!-- Reply Preference -->
+    <string-array name="reply_entries">
+        <item>Reply</item>
+        <item>Reply to all</item>
+    </string-array>
+
+    <string-array name="reply_values">
+        <item>reply</item>
+        <item>reply_all</item>
+    </string-array>
+
+    <string-array name="social_networks_entries">
+        <item>Google+</item>
+        <item>LinkedIn</item>
+        <item>Github</item>
+        <item>Twitter</item>
+    </string-array>
+
+    <string-array name="social_networks_values">
+        <item>http://plus.google.com</item>
+        <item>https://linkedin.com</item>
+        <item>https://github.com</item>
+        <item>https://twitter.com</item>
+    </string-array>
+    <string name="social_networks_default">http://plus.google.com</string>
+</resources>
