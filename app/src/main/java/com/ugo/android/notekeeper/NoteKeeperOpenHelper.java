@@ -6,6 +6,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import com.ugo.android.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
+import com.ugo.android.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
+
 public class NoteKeeperOpenHelper extends SQLiteOpenHelper {
     public static final String DATABASE_NAME = "NoteKeeper.db";
     public static final int DATABASE_VERSION = 1;
@@ -15,8 +18,8 @@ public class NoteKeeperOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(NoteKeeperDatabaseContract.CourseInfoEntry.SQL_CREATE_TABLE);
-        db.execSQL(NoteKeeperDatabaseContract.NoteInfoEntry.SQL_CREATE_TABLE);
+        db.execSQL(CourseInfoEntry.SQL_CREATE_TABLE);
+        db.execSQL(NoteInfoEntry.SQL_CREATE_TABLE);
 
         DatabaseDataWorker worker = new DatabaseDataWorker(db);
         worker.insertCourses();

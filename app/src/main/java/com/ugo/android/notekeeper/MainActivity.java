@@ -16,6 +16,7 @@ import com.google.android.material.navigation.NavigationView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.core.view.GravityCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -154,6 +155,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    public void onBackPressed() {
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
@@ -185,22 +196,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_notes:
                 //Toast.makeText(this, "Notes", Toast.LENGTH_LONG).show();
                 displayNotes();
-                drawer.closeDrawer(Gravity.LEFT);
+                //drawer.closeDrawer(Gravity.LEFT);
                 break;
             case R.id.nav_courses:
                 displayCourses();
-                drawer.closeDrawer(Gravity.LEFT);
+                //drawer.closeDrawer(Gravity.LEFT);
                 break;
             case R.id.nav_share:
                 handleShare();
-                drawer.closeDrawer(Gravity.LEFT);
+                //drawer.closeDrawer(Gravity.LEFT);
                 break;
             case R.id.nav_send:
                 handleSelection("Send");
-                drawer.closeDrawer(Gravity.LEFT);
+                //drawer.closeDrawer(Gravity.LEFT);
                 break;
         }
-        return false;
+
+        DrawerLayout drawer = findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return Boolean.TRUE;
     }
 
     private void handleShare() {
