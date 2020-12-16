@@ -211,7 +211,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 //drawer.closeDrawer(Gravity.LEFT);
                 break;
         }
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return Boolean.TRUE;
