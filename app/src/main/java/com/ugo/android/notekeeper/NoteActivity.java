@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cursoradapter.widget.SimpleCursorAdapter;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,6 +16,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.ugo.android.notekeeper.NoteKeeperDatabaseContract.CourseInfoEntry;
 import com.ugo.android.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
 import java.util.List;
@@ -37,6 +39,7 @@ public class NoteActivity extends AppCompatActivity {
     private int mCourseIdPosition;
     private int mNoteTitlePosition;
     private int mNoteTextPosition;
+    SimpleCursorAdapter adapterCourses;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,11 +50,16 @@ public class NoteActivity extends AppCompatActivity {
         mDbHelper = new NoteKeeperOpenHelper(this);
 
         spinnerCourses = findViewById(R.id.spinner_courses);
-        List<CourseInfo> courses = DataManager.getInstance().getCourses();
-        ArrayAdapter<CourseInfo> adapterCourses = new ArrayAdapter<>
-                (this, android.R.layout.simple_spinner_item, courses);
+        String[] courses = {CourseInfoEntry.COLUMN_COURSE_TITLE};
+        int[] cursorTextView = {android.R.id.text1};
+        //List<CourseInfo> courses = DataManager.getInstance().getCourses();
+        adapterCourses = new SimpleCursorAdapter
+                (this, android.R.layout.simple_spinner_item, null, courses,
+                        cursorTextView, 0);
         adapterCourses.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerCourses.setAdapter(adapterCourses);
+        
+        loadCourseData();
 
         readDisplayStateValues();
         if (savedInstanceState == null) {
@@ -68,6 +76,19 @@ public class NoteActivity extends AppCompatActivity {
            // displayNote();
             loadNoteData();
         }
+    }
+
+    private void loadCourseData() {
+        SQLiteDatabase db = mDbHelper.getReadableDatabase();
+        String[] courseColumns = {
+                CourseInfoEntry.COLUMN_COURSE_TITLE,
+                CourseInfoEntry.COLUMN_COURSE_ID,
+                CourseInfoEntry._ID
+        };
+        Cursor cursor = db.query(CourseInfoEntry.TABLE_NAME, courseColumns,
+                null, null, null, null, CourseInfoEntry.COLUMN_COURSE_TITLE);
+        adapterCourses.changeCursor(cursor);
+
     }
 
     private void loadNoteData() {
@@ -146,21 +167,38 @@ public class NoteActivity extends AppCompatActivity {
     }
 
     private void saveNote() {
-        mNote.setCourse((CourseInfo) spinnerCourses.getSelectedItem());
-        mNote.setTitle(textNoteTitle.getText().toString());
-        mNote.setText(textNoteText.getText().toString());
+//        mNote.setCourse((CourseInfo) spinnerCourses.getSelectedItem());
+//        mNote.setTitle(textNoteTitle.getText().toString());
+//        mNote.setText(textNoteText.getText().toString());
     }
 
     private void displayNote() {
         String courseId = noteCursor.getString(mCourseIdPosition);
         String noteTitle = noteCursor.getString(mNoteTitlePosition);
         String noteText = noteCursor.getString(mNoteTextPosition);
-        List<CourseInfo> courses = DataManager.getInstance().getCourses();
-        CourseInfo course = DataManager.getInstance().getCourse(courseId);
-        int courseIndex = courses.indexOf(course);
+//        List<CourseInfo> courses = DataManager.getInstance().getCourses();
+//        CourseInfo course = DataManager.getInstance().getCourse(courseId);
+        int courseIndex = getIndexOfCourseId(courseId);
         spinnerCourses.setSelection(courseIndex);
         textNoteTitle.setText(noteTitle);
         textNoteText.setText(noteText);
+    }
+
+    private int getIndexOfCourseId(String courseId) {
+        Cursor cursor = adapterCourses.getCursor();
+        int courseIdPosition = cursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_ID);
+        int courseRowIndex = 0;
+
+        boolean more = cursor.moveToFirst();
+        while(more) {
+            String cursorCourseId = cursor.getString(courseIdPosition);
+            if (courseId.equals(cursorCourseId))
+                break;
+
+            courseRowIndex++;
+            more = cursor.moveToNext();
+        }
+        return courseRowIndex;
     }
 
     private void readDisplayStateValues() {
@@ -176,7 +214,7 @@ public class NoteActivity extends AppCompatActivity {
     private void createNewNote() {
         DataManager dataManager = DataManager.getInstance();
         mNoteId = dataManager.createNewNote();
-        mNote = dataManager.getNotes().get(mNoteId);
+        //mNote = dataManager.getNotes().get(mNoteId);
     }
 
     @Override

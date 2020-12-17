@@ -2,6 +2,7 @@ package com.ugo.android.notekeeper;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.navigation.NavigationView;
+import com.ugo.android.notekeeper.NoteKeeperDatabaseContract.NoteInfoEntry;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
@@ -96,8 +98,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         //adapterNotes.notifyDataSetChanged();
-        mAdapter.notifyDataSetChanged();
+        //mAdapter.notifyDataSetChanged();
+        loadNotes();
         updateNavHeader();
+    }
+
+    private void loadNotes() {
+        SQLiteDatabase db = mDbOpenHelper.getReadableDatabase();
+
+        final String[] noteColumns = {
+                NoteInfoEntry.COLUMN_NOTE_TITLE,
+                NoteInfoEntry.COLUMN_COURSE_ID,
+                NoteInfoEntry._ID};
+        String noteOrderBy = NoteInfoEntry.COLUMN_COURSE_ID + "," + NoteInfoEntry.COLUMN_NOTE_TITLE;
+        final Cursor noteCursor = db.query(NoteInfoEntry.TABLE_NAME, noteColumns, null,
+                null, null, null, noteOrderBy);
+
+        mAdapter.changeCursor(noteCursor);
     }
 
     @Override
@@ -127,9 +144,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         coursesLayoutManager = new GridLayoutManager(this, SPAN_COUNT);
 
         notes = DataManager.getInstance().getNotes();
-        mAdapter = new NoteRecyclerAdapter(this, notes);
+        mAdapter = new NoteRecyclerAdapter(this, null);
 
-        courses = DataManager.getInstance().getCourses();
+        List<CourseInfo> courses = DataManager.getInstance().getCourses();
         courseAdapter = new CourseRecyclerAdapter(this, courses);
         displayNotes();
     }
