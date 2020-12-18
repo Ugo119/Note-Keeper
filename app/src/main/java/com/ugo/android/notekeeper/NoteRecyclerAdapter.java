@@ -18,7 +18,6 @@ import java.util.List;
 
 public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapter.ViewHolder> {
     private final Context mContext;
-    //private final List<NoteInfo> mNotes;
     private Cursor mCursor;
     LayoutInflater layoutInflater;
     int coursePosition;
@@ -29,7 +28,6 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
         this.mContext = mContext;
         layoutInflater = LayoutInflater.from(mContext);
         mCursor = cursor;
-
         populateColumnPositions();
     }
 
@@ -38,7 +36,7 @@ public class NoteRecyclerAdapter extends RecyclerView.Adapter<NoteRecyclerAdapte
             return;
         }
 
-        coursePosition = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_COURSE_ID);
+        coursePosition = mCursor.getColumnIndex(CourseInfoEntry.COLUMN_COURSE_TITLE);
         noteTitlePosition = mCursor.getColumnIndex(NoteInfoEntry.COLUMN_NOTE_TITLE);
         idPosition = mCursor.getColumnIndex(NoteInfoEntry._ID);
     }
